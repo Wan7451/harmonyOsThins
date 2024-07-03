@@ -10,7 +10,9 @@ export default class EntryAbility extends UIAbility {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     let eventHub = this.context.eventHub;
     eventHub.on("event1", (data1: string, data2: string) => {
+
       hilog.info(DOMAIN_NUMBER,TAG,`event1 ${data1} ${data2}`)
+
     })
   }
 

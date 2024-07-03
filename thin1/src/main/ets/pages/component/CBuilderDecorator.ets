@@ -159,6 +159,7 @@ struct Parent {
   }
 
   build() {
+
     Column() {
       Child({
         customBuilderParam: this.componentBuilder
@@ -166,6 +167,7 @@ struct Parent {
         .width("100%")
         .height(100)
     }
+
   }
 }
 

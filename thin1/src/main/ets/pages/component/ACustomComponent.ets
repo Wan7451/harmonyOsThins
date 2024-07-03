@@ -50,7 +50,7 @@ struct Index {
             message: this.message
           })
         })
-        .onClick(this.myClick.bind(this))
+        //.onClick(this.myClick.bind(this))
       ParentComponent()
         .width('100%')
         .height(100)

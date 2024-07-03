@@ -7,6 +7,8 @@
  * @BuilderParam用来装饰指向@Builder方法的变量（@BuilderParam是用来承接@Builder函数的），
  *    开发者可在初始化自定义组件时对此属性进行赋值，为自定义组件增加特定的功能。
  */
+import { promptAction } from '@kit.ArkUI'
+import { zlib } from '@kit.BasicServicesKit'
 
 @Entry
 @Component
@@ -28,6 +30,17 @@ struct CBuilderDecorator {
       overBuilder(this.label)
 
       Parent()
+
+      //可以将尾随闭包内的内容看做@Builder装饰的函数传给@BuilderParam。
+      CustomContainer() {
+        Text("尾包闭包")
+      }
+
+      global1.builder("这是个标题", 30)
+
+      ForEach(global2, (item: WrappedBuilder<[string, number]>) => {
+        item.builder("这是个内容", 30)
+      })
     }
 
   }
@@ -130,39 +143,69 @@ function overBuilder2() {
 /**
  * @BuilderParam用来**装饰**指向@Builder方法的变量（@BuilderParam是用来承接@Builder函数的），
  * 开发者可在初始化自定义组件时对此属性进行赋值，为自定义组件增加特定的功能。
+ * 类似UI回调，对外暴露一些能调整UI的接口
  */
 @Component
 struct Child {
+  label: string = "子View实现"
+
   @Builder
   doNothingBuilder() {
 
   }
 
+  @Builder
+  doNothingBuilder2($$: Tmp) {
+
+  }
+
   // 使用自定义组件的自定义构建函数初始化@BuilderParam
-  @BuilderParam customBuilderParam: () => void = this.doNothingBuilder
+  @BuilderParam customBuilderParam1: () => void = this.doNothingBuilder
   // 使用全局自定义构建函数初始化@BuilderParam
-  @BuilderParam customOverBuilderParam: () => void = overBuilder2
+  @BuilderParam customBuilderParam2: () => void = overBuilder2
+  //@BuilderParam装饰的方法类型需要和@Builder方法类型一致。
+  @BuilderParam customBuilderParam3: ($$: Tmp) => void = this.doNothingBuilder2
+  tmp: Tmp = {
+    param1: this.label
+  }
 
   build() {
     Column() {
-      Text("子View实现")
-      this.customBuilderParam()
+      this.customBuilderParam1()
+      this.customBuilderParam2()
+      this.customBuilderParam3(this.tmp)
     }
   }
 }
 
 @Component
 struct Parent {
+  label: string = "父容器实现"
+
   @Builder
   componentBuilder() {
-    Text("父容器实现")
+    Text(`${this.label}`)
+  }
+
+  /**
+   * @BuilderParam装饰的方法类型需要和@Builder方法类型一致。
+   */
+  @Builder
+  componentBuilder2($$: Tmp) {
+    Text(`${$$.param1}`)
+      .backgroundColor(Color.Red)
   }
 
   build() {
 
     Column() {
+      this.componentBuilder() //label = "父容器实现"
       Child({
-        customBuilderParam: this.componentBuilder
+        customBuilderParam1: this.componentBuilder, //方法被传入到Child label = "子View实现"
+        customBuilderParam2: () => {
+          this.componentBuilder() //label  = "父容器实现"
+        },
+        customBuilderParam3: this.componentBuilder2
       }).backgroundColor(Color.Green)
         .width("100%")
         .height(100)
@@ -170,5 +213,54 @@ struct Parent {
 
   }
 }
+
+
+/**
+ * @BuilderParam装饰的属性时也可通过尾随闭包进行初始化。
+ * 在初始化自定义组件时，组件后紧跟一个大括号“{}”形成尾随闭包场景。
+ *
+ * 1. 自定义组件内有且仅有一个使用@BuilderParam装饰的属性。
+ * 2. 自定义组件不支持使用通用属性。
+ */
+@Component
+struct CustomContainer {
+  @Builder
+  doNothing() {
+
+  }
+
+  @BuilderParam customContainer: () => void = this.doNothing
+
+  build() {
+    this.customContainer()
+  }
+}
+
+
+@Builder
+function title(title: string, size: number) {
+  Text(title).fontSize(size)
+}
+
+@Builder
+function contentText1(title: string, size: number) {
+  Text(title).fontSize(size)
+}
+
+@Builder
+function contentText2(title: string, size: number) {
+  Text(title).fontSize(size)
+  Divider()
+}
+
+/**
+ * wrapBuilder方法只能传入全局@Builder方法。
+ *
+ * wrapBuilder方法返回的WrappedBuilder对象的builder属性方法只能在struct内部使用。
+ */
+let global1 = wrapBuilder(title);
+
+let global2 = [wrapBuilder(contentText1), wrapBuilder(contentText2)]
+
 
 

@@ -1,0 +1,7 @@
+{
+  "src": [
+    "pages/component/ACustomComponent",
+    "pages/component/BLifeCycle",
+    "pages/component/CBuilderDecorator"
+  ]
+}

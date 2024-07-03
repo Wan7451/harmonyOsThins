@@ -42,6 +42,18 @@
           ]
         }
       ]
+    },
+    {
+      "name": "thin1",
+      "srcPath": "./thin1",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
     }
   ]
 }

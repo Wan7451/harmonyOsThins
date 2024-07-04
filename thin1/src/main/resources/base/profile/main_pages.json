@@ -2,6 +2,7 @@
   "src": [
     "pages/component/ACustomComponent",
     "pages/component/BLifeCycle",
-    "pages/component/CBuilderDecorator"
+    "pages/component/CBuilderDecorator",
+    "pages/component/DStyleDecorator"
   ]
 }

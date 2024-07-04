@@ -7,8 +7,6 @@
  * @BuilderParam用来装饰指向@Builder方法的变量（@BuilderParam是用来承接@Builder函数的），
  *    开发者可在初始化自定义组件时对此属性进行赋值，为自定义组件增加特定的功能。
  */
-import { promptAction } from '@kit.ArkUI'
-import { zlib } from '@kit.BasicServicesKit'
 
 @Entry
 @Component

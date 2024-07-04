@@ -1,8 +1,9 @@
 {
   "src": [
-    "pages/component/ACustomComponent",
-    "pages/component/BLifeCycle",
-    "pages/component/CBuilderDecorator",
-    "pages/component/DStyleDecorator"
+    "pages/decorator/ACustomComponent",
+    "pages/decorator/BLifeCycle",
+    "pages/decorator/CBuilderDecorator",
+    "pages/decorator/DStyleDecorator",
+    "pages/decorator/EAnimatableDecorator"
   ]
 }

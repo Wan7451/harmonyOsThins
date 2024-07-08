@@ -1,5 +1,3 @@
-
-
 /**
  * 状态管理
  *
@@ -87,15 +85,133 @@
  * 从父组件初始化         可选，从父组件初始化或者本地初始化。如果从父组件初始化将会覆盖本地初始化。
  *                      支持父组件中常规变量（常规变量对@State赋值，只是数值的初始化，常规变量的变化不会触发UI刷新，
  *                      只有状态变量才能触发UI刷新）、@State、@Link、@Prop、@Provide、@Consume、@ObjectLink、
- *                      @StorageLink、@StorageProp、@LocalStorageLink和@LocalStorageProp装饰的变量，
+ * @StorageLink、@StorageProp、@LocalStorageLink和@LocalStorageProp装饰的变量，
  *                      初始化子组件的@State。
  *
  * 用于初始化子组件        @State装饰的变量支持初始化子组件的常规变量、@State、@Link、@Prop、@Provide。
- * 是否支持组件外访问
+ * 是否支持组件外访问      不支持，只能在组件内访问。
+ *
+ * 并不是状态变量的所有更改都会引起UI的刷新，只有可以被框架观察到的修改才会引起UI刷新。
  */
+import { HashMap } from '@kit.ArkTS'
+
 @Entry
 @Component
-struct AState{
+struct AState {
+  //当装饰的数据类型为boolean、string、number类型时，可以观察到数值的变化。
+  @State count: number | undefined = undefined
+  @State content: string = "10"
+  @State vestibule: boolean = true
+  // class类型 当装饰的数据类型为class或者Object时，可以观察到自身的赋值的变化，和其属性赋值的变化
+  @State title: ModuleA = new ModuleA("ModuleA", new ClassA("ModuleA"))
+  //当装饰的对象是array时，可以观察到数组本身的赋值和添加、删除、更新数组的变化。
+  @State lists: ClassA[] = [new ClassA("1"), new ClassA("2")]
+  //当装饰的对象是Date时，可以观察到Date整体的赋值
+  @State date: Date = new Date()
+  //当装饰的变量是Map时，可以观察到Map整体的赋值，同时可通过调用Map的接口set, clear, delete 更新Map的值。
+  @State map: Map<string, string> = new Map<string, string>() // todo HashMap 为啥不行，必须Map
+  //当装饰的变量是Set时，可以观察到Set整体的赋值，同时可通过调用Set的接口add, clear, delete 更新Set的值。
+  @State set: Set<string> = new Set();
+
+  /**
+   * 当状态变量被改变时，查询依赖该状态变量的组件；
+   * 执行依赖该状态变量的组件的更新方法，组件更新渲染；
+   * 和该状态变量不相关的组件或者UI描述不会发生重新渲染，从而实现页面渲染的按需更新。
+   *
+   *
+   * 在状态管理中，类会被一层“代理”进行包装。
+   * 当在组件中改变该类的成员变量时，会被该代理进行拦截，在更改数据源中值的同时，也会将变化通知给绑定的组件，从而实现观测变化与触发刷新。
+   */
   build() {
+
+    Column() {
+      Text(`${this.title.value} ${this.title.name.value}`)
+      Text(`${this.count} ${this.content}  ${this.vestibule}`)
+        .onClick(() => {
+
+          if (!this.count) {
+            this.count = 100
+          } else {
+            this.count = this.count + 1
+            if (this.count % 2 == 0) {
+              this.count = undefined
+            }
+          }
+          this.content = `${this.count}`
+          this.vestibule = !this.vestibule
+          this.title.value = `${this.count}` //class属性的赋值可以观察到
+          this.title.name.value = `${this.count}` //嵌套属性的赋值观察不到。
+
+          //this.lists.push(new ClassA("3"))
+          //this.lists.pop()
+          this.lists[2] = new ClassA("3") // 数组项赋值可以观察到
+          this.lists[0].value = "new" // 嵌套的属性赋值观察不到
+
+          this.date.setTime(new Date().getTime())
+
+          this.map.set(`${this.count}`, new Date().toDateString())
+          this.set.add(new Date().toString())
+        })
+
+      ForEach(this.lists, (item: ClassA) => {
+        Text(`${item.value}`)
+        Divider()
+      })
+
+      Button(`${this.date.toTimeString()}`)
+
+      ForEach(Array.from(this.map.entries()), (item: [string, string]) => {
+        Button(`${item[0]}  ${item[1]}`)
+        Divider()
+      })
+
+      ForEach(Array.from(this.set.entries()), (item: string) => {
+        Text(`${item}`)
+        Divider()
+      })
+    }
   }
 }
+
+class ClassA {
+  value: string
+
+  constructor(value: string) {
+    this.value = value
+  }
+}
+
+class ModuleA {
+  value: string
+  name: ClassA
+
+  constructor(value: string, name: ClassA) {
+    this.value = value
+    this.name = name
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

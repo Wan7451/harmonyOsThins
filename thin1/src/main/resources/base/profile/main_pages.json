@@ -1,9 +1,10 @@
 {
   "src": [
-    "pages/decorator/ACustomComponent",
-    "pages/decorator/BLifeCycle",
-    "pages/decorator/CBuilderDecorator",
-    "pages/decorator/DStyleDecorator",
-    "pages/decorator/EAnimatableDecorator"
+    "pages/custom_component/ACustomComponent",
+    "pages/custom_component/BLifeCycle",
+    "pages/custom_component/CBuilderDecorator",
+    "pages/custom_component/DStyleDecorator",
+    "pages/custom_component/EAnimatableDecorator",
+    "pages/state/AState"
   ]
 }

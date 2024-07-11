@@ -6,6 +6,7 @@
     "pages/custom_component/DStyleDecorator",
     "pages/custom_component/EAnimatableDecorator",
     "pages/state/AState",
-    "pages/state/BProp"
+    "pages/state/BProp",
+    "pages/state/CLink"
   ]
 }

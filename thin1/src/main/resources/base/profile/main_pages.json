@@ -5,6 +5,7 @@
     "pages/custom_component/CBuilderDecorator",
     "pages/custom_component/DStyleDecorator",
     "pages/custom_component/EAnimatableDecorator",
-    "pages/state/AState"
+    "pages/state/AState",
+    "pages/state/BProp"
   ]
 }

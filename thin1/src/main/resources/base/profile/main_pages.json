@@ -11,6 +11,7 @@
     "pages/state/DProvideConsume",
     "pages/state/EObjectLink",
     "pages/state/FLocalStorage",
-    "pages/state/FLocalStorage2"
+    "pages/state/FLocalStorage2",
+    "pages/state/GAppStorage"
   ]
 }

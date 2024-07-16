@@ -22,6 +22,15 @@
         "startWindowIcon": "$media:startIcon",
         "startWindowBackground": "$color:start_window_background",
         "exported": true
+      },
+      {
+        "name": "Thin2Ability",
+        "srcEntry": "./ets/thin2ability/Thin2Ability.ets",
+        "description": "$string:Thin2Ability_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:Thin2Ability_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background"
       }
     ]
   }

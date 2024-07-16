@@ -11,6 +11,14 @@
     {
       "name": "Thin1Ability_label",
       "value": "label"
+    },
+    {
+      "name": "Thin2Ability_desc",
+      "value": "description"
+    },
+    {
+      "name": "Thin2Ability_label",
+      "value": "label"
     }
   ]
 }

@@ -12,6 +12,9 @@
     "pages/state/EObjectLink",
     "pages/state/FLocalStorage",
     "pages/state/FLocalStorage2",
-    "pages/state/GAppStorage"
+    "pages/state/GAppStorage",
+    "pages/state/HPersistentStorage",
+    "pages/state/IEnvironment",
+    "pages/state/JOthers"
   ]
 }

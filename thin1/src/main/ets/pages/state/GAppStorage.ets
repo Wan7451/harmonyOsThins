@@ -92,15 +92,65 @@
  * 2. AppStorage中属性键值key对应的数据一旦改变，属性键值key绑定的所有的数据（包括双向@StorageLink和单向@StorageProp）都将同步修改。
  * 3. 当@StorageLink(key)装饰的数据本身是状态变量，它的改变不仅仅会同步回AppStorage中，还会引起所属的自定义组件的重新渲染。
  *
+ *
+ *
+ * 不建议借助@StorageLink的双向同步机制实现事件通知
+ * 不建议开发者使用@StorageLink和AppStorage的双向同步的机制来实现事件通知，因为AppStorage中的变量可能绑定在多个不同页面的组件中，
+ * 但事件通知则不一定需要通知到所有的这些组件。并且，当这些@StorageLink装饰的变量在UI中使用时，会触发UI刷新，带来不必要的性能影响。
+ * 如果要使用该机制来实现事件通知，需要确保AppStorage中的变量尽量不要直接绑定在UI上，且需要控制@Watch函数的复杂度
+ * （如果@Watch函数执行时间长，会影响UI刷新效率）。
+ *
+ *
+ * AppStorage与PersistentStorage以及Environment配合使用时，需要注意以下几点：
+ * 1. 在AppStorage中创建属性后，调用PersistentStorage.persistProp()接口时，会使用在AppStorage中已经存在的值，
+ * 并覆盖PersistentStorage中的同名属性，所以建议要使用相反的调用顺序。
+ * 2. 如果在AppStorage中已经创建属性后，再调用Environment.envProp()创建同名的属性，会调用失败。
+ * 因为AppStorage已经有同名属性，Environment环境变量不会再写入AppStorage中，所以建议AppStorage中属性不要使用
+ * Environment预置环境变量名。
+ * 3. 状态装饰器装饰的变量，改变会引起UI的渲染更新，如果改变的变量不是用于UI更新，只是用于消息传递，推荐使用 emitter方式。
+ *
  */
+
+
+class GPropB {
+  code: number;
+
+  constructor(code: number) {
+    this.code = code;
+  }
+}
+
+AppStorage.setOrCreate('PropA', 47);
+AppStorage.setOrCreate('PropB', new GPropB(50));
+
 @Entry
 @Component
 struct GAppStorage {
+  @StorageLink('PropA') storageLink: number = 1;
+  @StorageLink('PropB') storageLinkObject: GPropB = new GPropB(1);
+
   build() {
-    Button('test')
-      .onClick(() => {
-        appStorage()
-      })
+
+    Column() {
+      Button('test')
+        .onClick(() => {
+          appStorage()
+        })
+
+      Text(`From AppStorage ${this.storageLink}`)
+        .onClick(() => {
+          this.storageLink += 1;
+        })
+      Text(`From AppStorage ${this.storageLinkObject.code}`)
+        .onClick(() => {
+          this.storageLinkObject.code += 1;
+        })
+
+      Button(`From AppStorage ${this.storageLink}`)
+      Button(`From AppStorage ${this.storageLinkObject.code}`)
+
+      Gallery2()
+    }
   }
 }
 
@@ -118,7 +168,94 @@ function appStorage() {
   console.log(`get ${AppStorage.get('Global_KET_1')} link1  ${link1.get()}  link2  ${link2.get()}`)
 }
 
+// xxx.ets
+class ViewData {
+  title: string;
+  uri: Resource;
+  color: Color = Color.Black;
 
+  constructor(title: string, uri: Resource) {
+    this.title = title;
+    this.uri = uri
+  }
+}
+
+@Component
+struct Gallery2 {
+  dataList: Array<ViewData> = [new ViewData('flower', $r('app.media.startIcon')), new ViewData('OMG', $r('app.media.startIcon')), new ViewData('OMG', $r('app.media.startIcon'))]
+  scroller: Scroller = new Scroller()
+
+  build() {
+    Column() {
+      Grid(this.scroller) {
+        ForEach(this.dataList, (item: ViewData, index?: number) => {
+          GridItem() {
+            TapImage({
+              uri: item.uri,
+              index: index
+            })
+          }.aspectRatio(1)
+
+        }, (item: ViewData, index?: number) => {
+          return JSON.stringify(item) + index;
+        })
+      }.columnsTemplate('1fr 1fr')
+    }
+
+  }
+}
+
+@Component
+export struct TapImage {
+  @StorageLink('tapIndex') @Watch('onTapIndexChange') tapIndex: number = -1;
+  @State tapColor: Color = Color.Black;
+  private index: number = 0;
+  private uri: Resource = {
+    id: 0,
+    type: 0,
+    moduleName: "",
+    bundleName: ""
+  };
+
+  // 判断是否被选中
+  onTapIndexChange() {
+    if (this.tapIndex >= 0 && this.index === this.tapIndex) {
+      console.info(`tapindex: ${this.tapIndex}, index: ${this.index}, red`)
+      this.tapColor = Color.Red;
+    } else {
+      console.info(`tapindex: ${this.tapIndex}, index: ${this.index}, black`)
+      this.tapColor = Color.Black;
+    }
+  }
+
+  /**
+   * TapImage中的点击事件，会触发AppStorage中tapIndex对应属性的改变。因为@StorageLink是双向同步，
+   * 修改会同步回AppStorage中，所以，所有绑定AppStorage的tapIndex自定义组件里都能感知到tapIndex的变化。
+   * 使用@Watch监听到tapIndex的变化后，修改状态变量tapColor从而触发UI刷新
+   * （此处tapIndex并未直接绑定在UI上，因此tapIndex的变化不会直接触发UI刷新）。
+   *
+   * 使用该机制来实现事件通知需要确保AppStorage中的变量尽量不要直接绑定在UI上，
+   * 且需要控制@Watch函数的复杂度（如果@Watch函数执行时间长，会影响UI刷新效率）。
+   *
+   * 开发者可以使用emit订阅某个事件并接收事件回调的方式来减少开销，增强代码的可读性。
+   * 开发者可以使用emit订阅某个事件并接收事件回调的方式来减少开销，增强代码的可读性。
+   * 开发者可以使用emit订阅某个事件并接收事件回调的方式来减少开销，增强代码的可读性。
+   * 开发者可以使用emit订阅某个事件并接收事件回调的方式来减少开销，增强代码的可读性。
+   * 开发者可以使用emit订阅某个事件并接收事件回调的方式来减少开销，增强代码的可读性。
+   * 开发者可以使用emit订阅某个事件并接收事件回调的方式来减少开销，增强代码的可读性。
+   */
+  build() {
+    Column() {
+      Image(this.uri)
+        .objectFit(ImageFit.Cover)
+        .onClick(() => {
+          this.tapIndex = this.index;
+        })
+        .border({ width: 5, style: BorderStyle.Dotted, color: this.tapColor })
+    }
+
+  }
+}
 
 
 

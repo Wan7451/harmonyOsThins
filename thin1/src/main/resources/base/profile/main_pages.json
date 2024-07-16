@@ -8,6 +8,7 @@
     "pages/state/AState",
     "pages/state/BProp",
     "pages/state/CLink",
-    "pages/state/DProvideConsume"
+    "pages/state/DProvideConsume",
+    "pages/state/EObjectLink"
   ]
 }

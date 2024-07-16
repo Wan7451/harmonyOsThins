@@ -7,6 +7,7 @@
     "pages/custom_component/EAnimatableDecorator",
     "pages/state/AState",
     "pages/state/BProp",
-    "pages/state/CLink"
+    "pages/state/CLink",
+    "pages/state/DProvideConsume"
   ]
 }

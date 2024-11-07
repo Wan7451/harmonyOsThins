@@ -15,6 +15,7 @@
     "pages/state/GAppStorage",
     "pages/state/HPersistentStorage",
     "pages/state/IEnvironment",
-    "pages/state/JOthers"
+    "pages/state/JOthers",
+    "pages/mvvm/MVVM"
   ]
 }
